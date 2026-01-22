@@ -1,174 +1,167 @@
+// NAVIGATION
 function showSection(id) {
-  document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-  if (id === "summary") generateSummary();
 }
 
-const painSlider = document.getElementById("painLevel");
-const painValue = document.getElementById("painValue");
-painSlider.oninput = () => painValue.textContent = painSlider.value;
-
-function saveData(key, entry) {
-  const data = JSON.parse(localStorage.getItem(key) || "[]");
-  data.unshift(entry);
-  localStorage.setItem(key, JSON.stringify(data));
-}
-
+// LOCAL STORAGE HELPERS
 function getData(key) {
   return JSON.parse(localStorage.getItem(key) || "[]");
 }
 
-// SYMPTOMS
-document.getElementById("symptomForm").onsubmit = e => {
-  e.preventDefault();
-  const joints = [...document.querySelectorAll(".joints input:checked")].map(j => j.value);
-  saveData("symptoms", {
-    date: new Date().toISOString(),
-    joints,
-    pain: painSlider.value,
-    notes: symptomNotes.value
-  });
-  e.target.reset();
-  displaySymptoms();
-};
+function saveData(key, data) {
+  const arr = getData(key);
+  arr.push(data);
+  localStorage.setItem(key, JSON.stringify(arr));
+}
 
-function displaySymptoms() {
-  symptomLog.innerHTML = "";
-  getData("symptoms").forEach(e => {
-    symptomLog.innerHTML += `
-      <div class="log-entry">
-        <strong>${new Date(e.date).toLocaleString()}</strong><br>
-        Joints: ${e.joints.join(", ")}<br>
-        Pain: ${e.pain}/10<br>
-        ${e.notes || ""}
-      </div>`;
+// PAIN SLIDER DISPLAY
+const painSlider = document.getElementById("painSlider");
+const painValue = document.getElementById("painValue");
+painSlider.addEventListener("input", () => { painValue.textContent = painSlider.value; });
+
+// SYMPTOMS PAGE
+document.querySelectorAll(".joints input").forEach(chk => {
+  chk.addEventListener("change", () => {
+    if (chk.checked) {
+      const note = prompt(`Notes for ${chk.value} (optional):`);
+      chk.dataset.note = note || "";
+    } else {
+      chk.dataset.note = "";
+    }
   });
+});
+
+function noSymptoms() {
+  document.querySelectorAll(".joints input").forEach(chk => {
+    chk.checked = false;
+    chk.dataset.note = "";
+  });
+  alert("No symptoms recorded for today.");
+}
+
+function saveSymptoms() {
+  const joints = [...document.querySelectorAll(".joints input:checked")].map(j => ({
+    name: j.value,
+    note: j.dataset.note || ""
+  }));
+  saveData("symptoms", { date: new Date().toISOString(), joints, pain: painSlider.value });
+  alert("Symptoms saved!");
 }
 
 // JOURNAL
 function saveJournal() {
-  saveData("journal", {
-    date: new Date().toISOString(),
-    text: journalEntry.value
-  });
-  journalEntry.value = "";
-  displayJournal();
+  const text = document.getElementById("journalText").value;
+  if (!text) return alert("Enter something first.");
+  saveData("journal", { date: new Date().toISOString(), text });
+  alert("Journal saved!");
+  document.getElementById("journalText").value = "";
 }
 
-function displayJournal() {
-  journalLog.innerHTML = "";
-  getData("journal").forEach(e => {
-    journalLog.innerHTML += `
-      <div class="log-entry">
-        <strong>${new Date(e.date).toLocaleString()}</strong><br>
-        ${e.text}
-      </div>`;
-  });
+// MEDICATIONS
+const bodymap = document.getElementById("bodymap-img");
+bodymap.addEventListener("click", e => {
+  const x = e.offsetX, y = e.offsetY;
+  document.getElementById("medDetails").value = getBodyPartFromXY(x, y);
+});
+function getBodyPartFromXY(x, y) {
+  if (y < 100) return "Shoulder";
+  if (y < 200) return "Upper arm";
+  if (y < 300) return "Forearm";
+  if (y < 400) return "Thigh";
+  return "Lower leg";
 }
 
-// MEDS
-function saveMedication() {
-  saveData("meds", {
-    date: new Date().toISOString(),
-    name: medName.value,
-    type: medType.value,
-    details: medDetails.value
-  });
-  medName.value = medDetails.value = "";
-  displayMeds();
+function saveMed() {
+  const name = document.getElementById("medName").value;
+  const type = document.getElementById("medType").value;
+  const details = document.getElementById("medDetails").value;
+  if (!name) return alert("Enter medication name.");
+  saveData("meds", { date: new Date().toISOString(), name, type, details });
+  alert("Medication saved!");
+  document.getElementById("medName").value = "";
+  document.getElementById("medDetails").value = "";
 }
 
-function displayMeds() {
-  medLog.innerHTML = "";
-  getData("meds").forEach(e => {
-    medLog.innerHTML += `
-      <div class="log-entry">
-        <strong>${e.name}</strong> (${e.type})<br>
-        ${new Date(e.date).toLocaleString()}<br>
-        ${e.details || ""}
-      </div>`;
+// HISTORY PAGE
+function showHistory() {
+  const date = new Date(document.getElementById("historyDate").value);
+  const dayStart = new Date(date); dayStart.setHours(0,0,0,0);
+  const dayEnd = new Date(date); dayEnd.setHours(23,59,59,999);
+
+  const symptoms = getData("symptoms").filter(e => {
+    const d = new Date(e.date); return d >= dayStart && d <= dayEnd;
   });
+  const journal = getData("journal").filter(e => {
+    const d = new Date(e.date); return d >= dayStart && d <= dayEnd;
+  });
+  const meds = getData("meds").filter(e => {
+    const d = new Date(e.date); return d >= dayStart && d <= dayEnd;
+  });
+
+  let html = "<h3>Symptoms</h3>";
+  symptoms.forEach(e => {
+    e.joints.forEach(j => { html += `${j.name} - Pain ${e.pain}/10 - Note: ${j.note || "None"}<br>`; });
+    html += "<hr>";
+  });
+  html += "<h3>Journal</h3>";
+  journal.forEach(e => { html += `${new Date(e.date).toLocaleString()}: ${e.text}<br><hr>`; });
+  html += "<h3>Medications</h3>";
+  meds.forEach(e => { html += `${new Date(e.date).toLocaleString()}: ${e.name} (${e.type}) - ${e.details}<br><hr>`; });
+
+  document.getElementById("historyLog").innerHTML = html || "No logs for this date.";
 }
 
-// SUMMARY
+// SUMMARY PAGE
 function generateSummary() {
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 30);
+  const range = Number(document.getElementById("summaryRange").value);
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - range);
 
   const symptoms = getData("symptoms").filter(e => new Date(e.date) >= cutoff);
   const meds = getData("meds").filter(e => new Date(e.date) >= cutoff);
 
-  const avgPain = symptoms.length
-    ? (symptoms.reduce((s, e) => s + Number(e.pain), 0) / symptoms.length).toFixed(1)
-    : "N/A";
+  let html = "<h3>Symptoms Summary</h3>";
+  symptoms.forEach(e => {
+    e.joints.forEach(j => { html += `${j.name} - Pain ${e.pain}/10 - Note: ${j.note || "None"}<br>`; });
+    html += "<hr>";
+  });
 
-  const jointCount = {};
-  symptoms.forEach(e => e.joints.forEach(j => jointCount[j] = (jointCount[j] || 0) + 1));
+  html += "<h3>Medications Summary</h3>";
+  meds.forEach(e => { html += `${new Date(e.date).toLocaleString()}: ${e.name} (${e.type}) - ${e.details}<br>`; });
 
-  const topJoints = Object.entries(jointCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(j => j[0])
-    .join(", ") || "None";
-
-  summaryContent.innerHTML = `
-    <div class="log-entry">
-      <strong>Average Pain:</strong> ${avgPain}/10<br>
-      <strong>Most Affected Joints:</strong> ${topJoints}<br>
-      <strong>Symptom Entries:</strong> ${symptoms.length}<br>
-      <strong>Medications Logged:</strong> ${meds.length}
-    </div>`;
-}
-
-// EXPORT HELPERS
-function setLast30Days() {
-  const end = new Date();
-  const start = new Date();
-  start.setDate(end.getDate() - 30);
-  startDate.valueAsDate = start;
-  endDate.valueAsDate = end;
-}
-
-function withinRange(date, start, end) {
-  const d = new Date(date);
-  return (!start || d >= start) && (!end || d <= end);
+  document.getElementById("summaryLog").innerHTML = html || "No data for selected range.";
 }
 
 // EXPORT PDF
 function exportPDF() {
-  const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-
-  const start = startDate.value ? new Date(startDate.value) : null;
-  const end = endDate.value ? new Date(endDate.value + "T23:59:59") : null;
-
   let y = 10;
-  doc.setFontSize(16);
-  doc.text("Arthritis Summary", 10, y);
-  y += 10;
+  const symptoms = getData("symptoms");
+  const journal = getData("journal");
+  const meds = getData("meds");
 
-  const symptoms = getData("symptoms").filter(e => withinRange(e.date, start, end));
-  const meds = getData("meds").filter(e => withinRange(e.date, start, end));
-
-  const avgPain = symptoms.length
-    ? (symptoms.reduce((s, e) => s + Number(e.pain), 0) / symptoms.length).toFixed(1)
-    : "N/A";
+  doc.setFontSize(14);
+  doc.text("Arthritis Tracker Export", 10, y); y += 10;
 
   doc.setFontSize(12);
-  doc.text(`Average Pain: ${avgPain}/10`, 10, y);
-  y += 8;
-  doc.text(`Symptom Entries: ${symptoms.length}`, 10, y);
-  y += 8;
-  doc.text(`Medications Logged: ${meds.length}`, 10, y);
+  doc.text("Symptoms:", 10, y); y += 10;
+  symptoms.forEach(e => {
+    e.joints.forEach(j => {
+      doc.text(`${j.name} - Pain ${e.pain}/10 - Note: ${j.note || "None"}`, 10, y); y += 8;
+    });
+    y += 4;
+  });
 
-  doc.save("arthritis-log.pdf");
+  doc.text("Journal:", 10, y); y += 10;
+  journal.forEach(e => { doc.text(`${new Date(e.date).toLocaleString()}: ${e.text}`, 10, y); y += 8; });
+
+  doc.text("Medications:", 10, y); y += 10;
+  meds.forEach(e => { doc.text(`${new Date(e.date).toLocaleString()}: ${e.name} (${e.type}) - ${e.details}`, 10, y); y += 8; });
+
+  doc.save("arthritis_export.pdf");
 }
 
-// INIT
-displaySymptoms();
-displayJournal();
-displayMeds();
-
+// REGISTER SERVICE WORKER
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
