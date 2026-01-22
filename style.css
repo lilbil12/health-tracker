@@ -1,0 +1,47 @@
+body {
+  font-family: system-ui, sans-serif;
+  background: #f4f6fb;
+  padding: 1rem;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+button {
+  background: #6a7efc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem;
+}
+
+section {
+  display: none;
+}
+
+section.active {
+  display: block;
+}
+
+textarea, input, select {
+  width: 100%;
+  margin-bottom: 0.6rem;
+  padding: 0.5rem;
+}
+
+.joints {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 0.5rem;
+}
+
+.log-entry {
+  background: white;
+  padding: 0.6rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
