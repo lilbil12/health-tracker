@@ -45,3 +45,16 @@ textarea, input, select {
   border-radius: 8px;
   margin-top: 0.5rem;
 }
+
+.active { display: block; }
+section { display: none; padding: 20px; }
+.home-btn {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+}
+
+.home-buttons { display: flex; flex-direction: column; gap: 10px; }
+.joints { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+#bodymap-img { width: 200px; cursor: pointer; margin-top: 10px; }
