@@ -1,101 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Arthritis Tracker</title>
-
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#6a7efc">
-
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arthritis Tracker</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6a7efc">
 </head>
 <body>
 
-<h1>Arthritis Tracker</h1>
-
-<nav>
-  <button onclick="showSection('symptoms')">Symptoms</button>
-  <button onclick="showSection('journal')">Journal</button>
-  <button onclick="showSection('meds')">Meds</button>
-  <button onclick="showSection('summary')">Summary</button>
-  <button onclick="showSection('export')">Export</button>
-</nav>
-
-<!-- SYMPTOMS -->
-<section id="symptoms" class="active">
-  <h2>Symptom Tracker</h2>
-
-  <form id="symptomForm">
-    <div class="joints">
-      <label><input type="checkbox" value="Hands"> Hands</label>
-      <label><input type="checkbox" value="Wrists"> Wrists</label>
-      <label><input type="checkbox" value="Elbows"> Elbows</label>
-      <label><input type="checkbox" value="Shoulders"> Shoulders</label>
-      <label><input type="checkbox" value="Hips"> Hips</label>
-      <label><input type="checkbox" value="Knees"> Knees</label>
-      <label><input type="checkbox" value="Ankles"> Ankles</label>
-      <label><input type="checkbox" value="Feet"> Feet</label>
-    </div>
-
-    <label>Pain level: <span id="painValue">5</span>/10</label>
-    <input type="range" min="1" max="10" id="painLevel" value="5">
-
-    <textarea id="symptomNotes" placeholder="Notes (optional)"></textarea>
-
-    <button type="submit">Save</button>
-  </form>
-
-  <div id="symptomLog"></div>
+<!-- HOME MENU -->
+<section id="home" class="active">
+  <h2>Welcome to Arthritis Tracker</h2>
+  <div class="home-buttons">
+    <button onclick="showSection('symptoms')">Symptoms</button>
+    <button onclick="showSection('journal')">Journal</button>
+    <button onclick="showSection('meds')">Medications</button>
+    <button onclick="showSection('summary')">Summary</button>
+    <button onclick="showSection('history')">History</button>
+    <button onclick="showSection('export')">Export</button>
+  </div>
 </section>
 
-<!-- JOURNAL -->
+<!-- SYMPTOMS PAGE -->
+<section id="symptoms">
+  <button class="home-btn" onclick="showSection('home')">🏠 Home</button>
+  <h2>Symptoms</h2>
+  <label>Pain scale: <span id="painValue">5</span></label>
+  <input type="range" min="0" max="10" value="5" id="painSlider">
+
+  <div class="joints">
+    <label><input type="checkbox" value="Hands"> Hands</label>
+    <label><input type="checkbox" value="Wrists"> Wrists</label>
+    <label><input type="checkbox" value="Elbows"> Elbows</label>
+    <label><input type="checkbox" value="Shoulders"> Shoulders</label>
+    <label><input type="checkbox" value="Hips"> Hips</label>
+    <label><input type="checkbox" value="Knees"> Knees</label>
+    <label><input type="checkbox" value="Ankles"> Ankles</label>
+    <label><input type="checkbox" value="Back"> Back</label>
+  </div>
+  <button type="button" onclick="noSymptoms()">No Symptoms</button>
+  <button onclick="saveSymptoms()">Save Symptoms</button>
+</section>
+
+<!-- JOURNAL PAGE -->
 <section id="journal">
+  <button class="home-btn" onclick="showSection('home')">🏠 Home</button>
   <h2>Journal</h2>
-  <textarea id="journalEntry" placeholder="Write anything..."></textarea>
+  <textarea id="journalText" placeholder="Write your journal..."></textarea>
   <button onclick="saveJournal()">Save Entry</button>
-  <div id="journalLog"></div>
 </section>
 
-<!-- MEDS -->
+<!-- MEDICATIONS PAGE -->
 <section id="meds">
-  <h2>Medication Log</h2>
-
-  <input id="medName" placeholder="Medication name">
-
+  <button class="home-btn" onclick="showSection('home')">🏠 Home</button>
+  <h2>Medications</h2>
+  <input type="text" id="medName" placeholder="Medication name">
   <select id="medType">
-    <option value="Oral">Oral</option>
-    <option value="Injection">Injection</option>
-    <option value="Infusion">Infusion</option>
+    <option value="pill">Pill</option>
+    <option value="injection">Injection</option>
+    <option value="infusion">Infusion</option>
   </select>
-
-  <input id="medDetails" placeholder="Injection site / notes">
-
-  <button onclick="saveMedication()">Save Medication</button>
-  <div id="medLog"></div>
+  <input type="text" id="medDetails" placeholder="Details / injection site">
+  <div id="injection-map">
+    <img src="bodymap.svg" alt="Click injection site" id="bodymap-img">
+  </div>
+  <button onclick="saveMed()">Save Medication</button>
 </section>
 
-<!-- SUMMARY -->
+<!-- SUMMARY PAGE -->
 <section id="summary">
-  <h2>Summary (Last 30 Days)</h2>
-  <div id="summaryContent"></div>
+  <button class="home-btn" onclick="showSection('home')">🏠 Home</button>
+  <h2>Summary</h2>
+  <label>Choose range:</label>
+  <select id="summaryRange" onchange="generateSummary()">
+    <option value="7">Last Week</option>
+    <option value="30" selected>Last 30 Days</option>
+  </select>
+  <div id="summaryLog"></div>
 </section>
 
-<!-- EXPORT -->
+<!-- HISTORY PAGE -->
+<section id="history">
+  <button class="home-btn" onclick="showSection('home')">🏠 Home</button>
+  <h2>History</h2>
+  <label>Select Date:</label>
+  <input type="date" id="historyDate">
+  <button onclick="showHistory()">View Logs</button>
+  <div id="historyLog"></div>
+</section>
+
+<!-- EXPORT PAGE -->
 <section id="export">
+  <button class="home-btn" onclick="showSection('home')">🏠 Home</button>
   <h2>Export Data</h2>
-
-  <label>Start date</label>
-  <input type="date" id="startDate">
-
-  <label>End date</label>
-  <input type="date" id="endDate">
-
-  <button onclick="setLast30Days()">Last 30 Days</button>
   <button onclick="exportPDF()">Export PDF</button>
 </section>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
