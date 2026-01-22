@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Arthritis Tracker</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6a7efc">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Arthritis Tracker</h1>
+
+<nav>
+  <button onclick="showSection('symptoms')">Symptoms</button>
+  <button onclick="showSection('journal')">Journal</button>
+  <button onclick="showSection('meds')">Meds</button>
+  <button onclick="showSection('summary')">Summary</button>
+  <button onclick="showSection('export')">Export</button>
+</nav>
+
+<!-- SYMPTOMS -->
+<section id="symptoms" class="active">
+  <h2>Symptom Tracker</h2>
+
+  <form id="symptomForm">
+    <div class="joints">
+      <label><input type="checkbox" value="Hands"> Hands</label>
+      <label><input type="checkbox" value="Wrists"> Wrists</label>
+      <label><input type="checkbox" value="Elbows"> Elbows</label>
+      <label><input type="checkbox" value="Shoulders"> Shoulders</label>
+      <label><input type="checkbox" value="Hips"> Hips</label>
+      <label><input type="checkbox" value="Knees"> Knees</label>
+      <label><input type="checkbox" value="Ankles"> Ankles</label>
+      <label><input type="checkbox" value="Feet"> Feet</label>
+    </div>
+
+    <label>Pain level: <span id="painValue">5</span>/10</label>
+    <input type="range" min="1" max="10" id="painLevel" value="5">
+
+    <textarea id="symptomNotes" placeholder="Notes (optional)"></textarea>
+
+    <button type="submit">Save</button>
+  </form>
+
+  <div id="symptomLog"></div>
+</section>
+
+<!-- JOURNAL -->
+<section id="journal">
+  <h2>Journal</h2>
+  <textarea id="journalEntry" placeholder="Write anything..."></textarea>
+  <button onclick="saveJournal()">Save Entry</button>
+  <div id="journalLog"></div>
+</section>
+
+<!-- MEDS -->
+<section id="meds">
+  <h2>Medication Log</h2>
+
+  <input id="medName" placeholder="Medication name">
+
+  <select id="medType">
+    <option value="Oral">Oral</option>
+    <option value="Injection">Injection</option>
+    <option value="Infusion">Infusion</option>
+  </select>
+
+  <input id="medDetails" placeholder="Injection site / notes">
+
+  <button onclick="saveMedication()">Save Medication</button>
+  <div id="medLog"></div>
+</section>
+
+<!-- SUMMARY -->
+<section id="summary">
+  <h2>Summary (Last 30 Days)</h2>
+  <div id="summaryContent"></div>
+</section>
+
+<!-- EXPORT -->
+<section id="export">
+  <h2>Export Data</h2>
+
+  <label>Start date</label>
+  <input type="date" id="startDate">
+
+  <label>End date</label>
+  <input type="date" id="endDate">
+
+  <button onclick="setLast30Days()">Last 30 Days</button>
+  <button onclick="exportPDF()">Export PDF</button>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
